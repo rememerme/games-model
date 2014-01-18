@@ -1,4 +1,4 @@
-from models import Game, Party, PartyMember, Round, Nomination
+from models import Game, GameMember, Round, Nomination
 from rest_framework import serializers
 
 class GameSerializer(serializers.ModelSerializer):
@@ -10,23 +10,14 @@ class GameSerializer(serializers.ModelSerializer):
         model = Game
         fields = ('game_id', 'party_id', 'current_round_id', 'date_created', 'last_modified')
         
-class PartySerializer(serializers.ModelSerializer):
+class GameMemberSerializer(serializers.ModelSerializer):
     '''
-        The Party serializer used to create a python dictionary for submitting to the
+        The Game Member serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
     class Meta:
-        model = Party
-        fields = ('party_id', 'leader_id', 'date_created', 'last_modified')
-        
-class PartyMemberSerializer(serializers.ModelSerializer):
-    '''
-        The Party Member serializer used to create a python dictionary for submitting to the
-        Cassandra database with the correct options.
-    '''
-    class Meta:
-        model = PartyMember
-        fields = ('party_member_id', 'user_id', 'party_id', 'date_created', 'last_modified')      
+        model = GameMember
+        fields = ('game_member_id', 'user_id', 'game_id', 'status', 'date_created', 'last_modified')      
         
 class RoundSerializer(serializers.ModelSerializer):
     '''

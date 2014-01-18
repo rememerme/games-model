@@ -23,10 +23,12 @@ class Game(CassaModel):
     table = pycassa.ColumnFamily(POOL, 'game')
     
     game_id = models.TextField(primary_key=True)
-    party_id = models.TextField()
+    leader_id = models.TextField()
     current_round_id = models.TextField()
     date_created = models.DateTimeField()
     last_modified = models.DateTimeField()
+    winning_score = models.IntegerField()
+    started = models.BooleanField()
 
     @staticmethod
     def fromMap(mapRep):
@@ -87,98 +89,28 @@ class CassaGameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('party_id', 'current_round_id', 'date_created', 'last_modified')
+        fields = ('leader_id', 'current_round_id', 'date_created', 'last_modified')
 
 
-class Party(CassaModel):
-    '''
-        The Game model to support the API.
-    '''
-    table = pycassa.ColumnFamily(POOL, 'party')
-    
-    party_id = models.TextField(primary_key=True)
-    leader_id = models.TextField()
-    date_created = models.DateTimeField()
-    last_modified = models.DateTimeField()
-
-    @staticmethod
-    def fromMap(mapRep):
-        '''
-            Creates a Party object from a map object with the properties.
-        '''
-        party = Party(**mapRep)
-        return party
-
-    @staticmethod
-    def fromCassa(cassRep):
-        '''
-            Creates a Party object from the tuple return from Cassandra.
-        '''
-        mapRep = {key : val for key, val in cassRep[1].iteritems()}
-        mapRep['party_id'] = str(cassRep[0])
-        
-        return Party.fromMap(mapRep)
-    
-    @staticmethod
-    def get(party_id=None):
-        '''
-            Method for getting a party by id.
-        '''
-        if party_id:
-            return Party.getByID(party_id)
-        
-        return None
-    
-    @staticmethod
-    def getByID(party_id):
-        '''
-            Gets the user's Party given an ID.
-                    
-            @param party_id: The uuid of the party.
-        '''
-        if not isinstance(party_id, uuid.UUID):
-            party_id = uuid.UUID(party_id)
-        return Party.fromCassa((str(party_id), Party.table.get(party_id)))
-    
-    def save(self):
-        '''
-            Saves a set of Party given by the cassandra in/output, which is
-            a dictionary of values.
-        '''
-        party_id = uuid.uuid1() if not self.party_id else uuid.UUID(self.party_id)
-        Party.table.insert(party_id, CassaGameSerializer(self).data)
-        self.party_id = str(party_id)
-        
-
-class CassaPartySerializer(serializers.ModelSerializer):
-    '''
-        The Party serializer used to create a python dictionary for submitting to the
-        Cassandra database with the correct options.
-    '''
-
-    class Meta:
-        model = Party
-        fields = ('leader_id', 'date_created', 'last_modified')
-
-
-class PartyMember(CassaModel):
+class GameMember(CassaModel):
     '''
         The Party Member model to support the API.
     '''
-    table = pycassa.ColumnFamily(POOL, 'party_member')
+    table = pycassa.ColumnFamily(POOL, 'game_member')
     
-    party_member_id = models.TextField(primary_key=True)
+    game_member_id = models.TextField(primary_key=True)
     user_id = models.TextField()
-    party_id = models.TextField()
+    game_id = models.TextField()
     date_created = models.DateTimeField()
     last_modified = models.DateTimeField()
+    status = models.IntegerField()
 
     @staticmethod
     def fromMap(mapRep):
         '''
             Creates a Party object from a map object with the properties.
         '''
-        member = PartyMember(**mapRep)
+        member = GameMember(**mapRep)
         return member
 
     @staticmethod
@@ -187,52 +119,52 @@ class PartyMember(CassaModel):
             Creates a Party object from the tuple return from Cassandra.
         '''
         mapRep = {key : val for key, val in cassRep[1].iteritems()}
-        mapRep['party_member_id'] = str(cassRep[0])
+        mapRep['game_member_id'] = str(cassRep[0])
         
-        return PartyMember.fromMap(mapRep)
+        return GameMember.fromMap(mapRep)
     
     @staticmethod
-    def get(party_member_id=None):
+    def get(game_member_id=None):
         '''
             Method for getting a party member by id, party_id or user_id
         '''
-        if party_member_id:
-            return PartyMember.getByID(party_member_id)
+        if game_member_id:
+            return GameMember.getByID(game_member_id)
         
         return None
     
     @staticmethod
-    def filter(party_id=None, user_id=None):
-        if party_id:
-            return PartyMember.filterByParty(party_id)
+    def filter(game_id=None, user_id=None):
+        if game_id:
+            return GameMember.filterByGame(game_id)
         
         if user_id:
-            return PartyMember.filterByUser(user_id)
+            return GameMember.filterByUser(user_id)
     
     @staticmethod
-    def getByID(party_member_id):
+    def getByID(game_member_id):
         '''
-            Gets the Party members given an ID.
+            Gets the game members given an ID.
                     
-            @param party_id: The uuid of the party.
+            @param game_member_id: The uuid of the game member.
         '''
-        if not isinstance(party_member_id, uuid.UUID):
-            party_member_id = uuid.UUID(party_member_id)
-        return PartyMember.fromCassa((str(party_member_id), PartyMember.table.get(party_member_id)))
+        if not isinstance(game_member_id, uuid.UUID):
+            game_member_id = uuid.UUID(game_member_id)
+        return GameMember.fromCassa((str(game_member_id), GameMember.table.get(game_member_id)))
     
     @staticmethod
-    def filterByParty(party_id):
+    def filterByGame(game_id):
         '''
             Gets the party members by party.
         '''
-        if not isinstance(party_id, uuid.UUID):
-            party_id = uuid.UUID(party_id)
+        if not isinstance(game_id, uuid.UUID):
+            game_id = uuid.UUID(game_id)
             
-        expr = pycassa.create_index_expression('party_id', party_id)
+        expr = pycassa.create_index_expression('game_id', game_id)
         clause = pycassa.create_index_clause([expr])
-        ans = list(PartyMember.table.get_indexed_slices(clause))
+        ans = list(GameMember.table.get_indexed_slices(clause))
         
-        return [PartyMember.fromCassa(cassRep) for cassRep in ans]
+        return [GameMember.fromCassa(cassRep) for cassRep in ans]
     
     @staticmethod
     def filterByUser(user_id):
@@ -244,28 +176,28 @@ class PartyMember(CassaModel):
             
         expr = pycassa.create_index_expression('user_id', user_id)
         clause = pycassa.create_index_clause([expr])
-        ans = list(PartyMember.table.get_indexed_slices(clause))
+        ans = list(GameMember.table.get_indexed_slices(clause))
         
-        return [PartyMember.fromCassa(cassRep) for cassRep in ans]
+        return [GameMember.fromCassa(cassRep) for cassRep in ans]
     
     def save(self):
         '''
             Saves a set of Party given by the cassandra in/output, which is
             a dictionary of values.
         '''
-        party_member_id = uuid.uuid1() if not self.party_member_id else uuid.UUID(self.party_member_id)
-        PartyMember.table.insert(party_member_id, CassaPartyMemberSerializer(self).data)
-        self.party_member_id = str(party_member_id)
+        game_member_id = uuid.uuid1() if not self.game_member_id else uuid.UUID(self.game_member_id)
+        GameMember.table.insert(game_member_id, CassaGameMemberSerializer(self).data)
+        self.game_member_id = str(game_member_id)
         
 
-class CassaPartyMemberSerializer(serializers.ModelSerializer):
+class CassaGameMemberSerializer(serializers.ModelSerializer):
     '''
         The Party serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
     class Meta:
-        model = PartyMember
-        fields = ('user_id', 'party_id', 'date_created', 'last_modified')
+        model = GameMember
+        fields = ('user_id', 'game_id', 'status', 'date_created', 'last_modified')
 
 class Round(CassaModel):
     '''

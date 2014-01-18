@@ -12,6 +12,7 @@ import pycassa
 from django.conf import settings
 import uuid
 from rest_framework import serializers
+from uuid import UUID
 
 # User model faked to use Cassandra
 POOL = pycassa.ConnectionPool('games', server_list=settings.CASSANDRA_NODES)
@@ -86,10 +87,15 @@ class CassaGameSerializer(serializers.ModelSerializer):
         The Game serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
+    def transform_leader_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
 
     class Meta:
         model = Game
-        fields = ('leader_id', 'current_round_id', 'date_created', 'last_modified')
+        fields = ('winning_score', 'leader_id', 'current_round_id', 'date_created', 'last_modified')
 
 
 class GameMember(CassaModel):
@@ -195,6 +201,18 @@ class CassaGameMemberSerializer(serializers.ModelSerializer):
         The Party serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
+    def transform_user_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
+    def transform_game_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
     class Meta:
         model = GameMember
         fields = ('user_id', 'game_id', 'status', 'date_created', 'last_modified')

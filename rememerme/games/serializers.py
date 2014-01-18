@@ -1,4 +1,4 @@
-fom models import Game, GameMember, Round, Nomination
+from models import Game, GameMember, Round, Nomination
 from rest_framework import serializers
 
 class GameSerializer(serializers.ModelSerializer):

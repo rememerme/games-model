@@ -1,4 +1,4 @@
-from models import Game, GameMember, Round, Nomination
+fom models import Game, GameMember, Round, Nomination
 from rest_framework import serializers
 
 class GameSerializer(serializers.ModelSerializer):
@@ -8,7 +8,7 @@ class GameSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = Game
-        fields = ('game_id', 'party_id', 'current_round_id', 'date_created', 'last_modified')
+        fields = ('game_id', 'leader_id', 'current_round_id', 'date_created', 'last_modified')
         
 class GameMemberSerializer(serializers.ModelSerializer):
     '''

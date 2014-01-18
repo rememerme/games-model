@@ -84,11 +84,6 @@ class CassaGameSerializer(serializers.ModelSerializer):
         The Game serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
-    def transform_party_id(self, obj, value):
-        return uuid.UUID(value)
-    
-    def transform_current_round_id(self, obj, value):
-        return uuid.UUID(value)
 
     class Meta:
         model = Game
@@ -160,11 +155,9 @@ class CassaPartySerializer(serializers.ModelSerializer):
         The Party serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
-    def transform_leader_id(self, obj, value):
-        return uuid.UUID(value)
 
     class Meta:
-        model = Game
+        model = Party
         fields = ('leader_id', 'date_created', 'last_modified')
 
 
@@ -271,7 +264,7 @@ class CassaPartyMemberSerializer(serializers.ModelSerializer):
         Cassandra database with the correct options.
     '''
     class Meta:
-        model = Game
+        model = PartyMember
         fields = ('user_id', 'party_id', 'date_created', 'last_modified')
 
 class Round(CassaModel):
@@ -343,7 +336,7 @@ class CassaRoundSerializer(serializers.ModelSerializer):
         Cassandra database with the correct options.
     '''
     class Meta:
-        model = Game
+        model = Round
         fields = ('selector_id', 'selection_id', 'game_id', 'phrase_card_id', 'date_created', 'last_modified')
         
         
@@ -453,5 +446,5 @@ class CassaNominationSerializer(serializers.ModelSerializer):
         Cassandra database with the correct options.
     '''
     class Meta:
-        model = Game
+        model = Nomination
         fields = ('round_id', 'nominator_id', 'nomination_card_id', 'date_created', 'last_modified')

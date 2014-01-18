@@ -1,27 +1,48 @@
-from models import Friends, ReceivedRequests, SentRequests
+from models import Game, Party, PartyMember, Round, Nomination
 from rest_framework import serializers
-import json
 
-class FriendsSerializer(serializers.ModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
     '''
-        The Friends serializer used to display a model to the web through json serialization.
+        The Game serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
     '''
     class Meta:
-        model = Friends 
-        fields = ('friends_list', )
+        model = Game
+        fields = ('game_id', 'party_id', 'current_round_id', 'date_created', 'last_modified')
         
-class ReceivedRequestsSerializer(serializers.ModelSerializer):
+class PartySerializer(serializers.ModelSerializer):
     '''
-        The Requests serializer used to display a model to the web through json serialization.
+        The Party serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
     '''
     class Meta:
-        model = ReceivedRequests 
-        fields = ('requests', )
+        model = Party
+        fields = ('party_id', 'leader_id', 'date_created', 'last_modified')
         
-class SentRequestsSerializer(serializers.ModelSerializer):
+class PartyMemberSerializer(serializers.ModelSerializer):
     '''
-        The Requests serializer used to display a model to the web through json serialization.
+        The Party Member serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
     '''
     class Meta:
-        model = SentRequests 
-        fields = ('requests', )
+        model = PartyMember
+        fields = ('party_member_id', 'user_id', 'party_id', 'date_created', 'last_modified')      
+        
+class RoundSerializer(serializers.ModelSerializer):
+    '''
+        The Round serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = Round
+        fields = ('round_id', 'selector_id', 'selection_id', 'game_id', 'phrase_card_id', 'date_created', 'last_modified')
+        
+class NominationSerializer(serializers.ModelSerializer):
+    '''
+        The Nomination serializer used to create a python dictionary for submitting to the
+        Cassandra database with the correct options.
+    '''
+    class Meta:
+        model = Nomination
+        fields = ('nomination_id', 'round_id', 'nominator_id', 'nomination_card_id', 'date_created', 'last_modified') 
+

@@ -285,6 +285,24 @@ class CassaRoundSerializer(serializers.ModelSerializer):
         The Party serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
+    def transform_selector_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
+    def transform_game_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
+    def transform_phrase_card_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
     class Meta:
         model = Round
         fields = ('selector_id', 'selection_id', 'game_id', 'phrase_card_id', 'date_created', 'last_modified')
@@ -381,6 +399,24 @@ class CassaNominationSerializer(serializers.ModelSerializer):
         The Party serializer used to create a python dictionary for submitting to the
         Cassandra database with the correct options.
     '''
+    def transform_round_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
+    def transform_nominator_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
+    def transform_nomination_card_id(self, obj, value):
+        if not isinstance(value, UUID):
+            return UUID(value)
+
+        return value
+
     class Meta:
         model = Nomination
         fields = ('round_id', 'nominator_id', 'nomination_card_id', 'date_created', 'last_modified')

@@ -9,8 +9,8 @@ class GamePermissions():
     @staticmethod
     def has_object_permission(request, obj):
         try:
-            members = set(GameMember.filterByGame(obj.game_id))
-            return GameMember(user_id=request.user.pk) in members
+            members = set([str(mem.user_id) for mem in GameMember.filterByGame(obj.game_id)])
+            return request.user.pk in members
         except CassaNotFoundException:
             # Instance must have an attribute named `owner`.
             return False

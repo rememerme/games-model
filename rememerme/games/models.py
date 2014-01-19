@@ -110,6 +110,7 @@ class GameMember(CassaModel):
     date_created = models.DateTimeField()
     last_modified = models.DateTimeField()
     status = models.IntegerField()
+    score = models.IntegerField()
 
     @staticmethod
     def fromMap(mapRep):
@@ -215,7 +216,7 @@ class CassaGameMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GameMember
-        fields = ('user_id', 'game_id', 'status', 'date_created', 'last_modified')
+        fields = ('user_id', 'game_id', 'status', 'date_created', 'last_modified', 'score')
 
 class Round(CassaModel):
     '''
@@ -337,7 +338,7 @@ class Nomination(CassaModel):
         mapRep = {key : val for key, val in cassRep[1].iteritems()}
         mapRep['nomination_id'] = str(cassRep[0])
         
-        return Round.fromMap(mapRep)
+        return Nomination.fromMap(mapRep)
     
     @staticmethod
     def get(nomination_id=None):
@@ -390,7 +391,7 @@ class Nomination(CassaModel):
             a dictionary of values.
         '''
         nomination_id = uuid.uuid1() if not self.nomination_id else uuid.UUID(self.nomination_id)
-        Round.table.insert(nomination_id, CassaRoundSerializer(self).data)
+        Nomination.table.insert(nomination_id, CassaNominationSerializer(self).data)
         self.nomination_id = str(nomination_id)
         
 

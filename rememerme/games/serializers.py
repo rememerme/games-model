@@ -8,7 +8,7 @@ class GameSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = Game
-        fields = ('game_id', 'leader_id', 'current_round_id', 'date_created', 'last_modified')
+        fields = ('game_id', 'leader_id', 'current_round_id', 'date_created', 'last_modified', 'deck')
         
 class GameMemberSerializer(serializers.ModelSerializer):
     '''

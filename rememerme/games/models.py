@@ -29,7 +29,7 @@ class Game(CassaModel):
     date_created = models.DateTimeField()
     last_modified = models.DateTimeField()
     winning_score = models.IntegerField()
-    started = models.BooleanField()
+    deck = models.TextField()
 
     @staticmethod
     def fromMap(mapRep):
@@ -95,7 +95,7 @@ class CassaGameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('winning_score', 'leader_id', 'current_round_id', 'date_created', 'last_modified')
+        fields = ('winning_score', 'leader_id', 'current_round_id', 'date_created', 'last_modified', 'deck')
 
 
 class GameMember(CassaModel):
@@ -361,20 +361,6 @@ class Nomination(CassaModel):
             round_id = uuid.UUID(round_id)
             
         expr = pycassa.create_index_expression('round_id', round_id)
-        clause = pycassa.create_index_clause([expr])
-        ans = list(Nomination.table.get_indexed_slices(clause))
-        
-        return [Nomination.fromCassa(cassRep) for cassRep in ans]
-    
-    @staticmethod
-    def filterByUser(user_id):
-        '''
-            Gets the nomination by the round.
-        '''
-        if not isinstance(user_id, uuid.UUID):
-            user_id = uuid.UUID(user_id)
-            
-        expr = pycassa.create_index_expression('user_id', user_id)
         clause = pycassa.create_index_clause([expr])
         ans = list(Nomination.table.get_indexed_slices(clause))
         
